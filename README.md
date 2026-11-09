@@ -72,7 +72,3 @@ The Azure pipeline runs a Chromium/Firefox/WebKit matrix. It uses Ubuntu-hosted 
 - Tests target the public Sauce Demo practice application and its current labels and `data-test` attributes; a redesign may require locator updates.
 - The default suite uses Chromium locally. The CI matrix adds Firefox and WebKit coverage.
 - With more time, I would add a scheduled run, richer failure metadata (browser/version and commit), retry policy informed by observed flakiness, and an Allure report only if stakeholders need its history and dashboards.
-
-## AI usage
-
-An AI coding assistant was used to scaffold the project structure, propose the page objects and test scenarios, and draft the pipeline and documentation. The generated code was reviewed and validated locally; the author should be prepared to explain and maintain every line.
