@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Generated test output; checked-in examples live in sample-reports/
+reports/
+test-results/
+
+# Local environment and IDE files
+.env
+.vscode/

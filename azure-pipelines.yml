@@ -1,0 +1,82 @@
+parameters:
+  - name: useMicrosoftHosted
+    displayName: Use Microsoft-hosted Ubuntu agent
+    type: boolean
+    default: true
+  - name: selfHostedPool
+    displayName: Self-hosted agent pool name (when hosted is disabled)
+    type: string
+    default: ''
+
+trigger:
+  - '*'
+
+pr:
+  - '*'
+
+pool:
+  ${{ if eq(parameters.useMicrosoftHosted, true) }}:
+    vmImage: ubuntu-latest
+  ${{ else }}:
+    name: ${{ parameters.selfHostedPool }}
+
+strategy:
+  matrix:
+    chromium:
+      browser: chromium
+    firefox:
+      browser: firefox
+    webkit:
+      browser: webkit
+
+variables:
+  pythonVersion: '3.11'
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: Use Python $(pythonVersion)
+    inputs:
+      versionSpec: $(pythonVersion)
+      addToPath: true
+
+  - script: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+    displayName: Install pinned Python dependencies
+
+  - script: python -m playwright install --with-deps $(browser)
+    displayName: Install Playwright $(browser) and system dependencies
+
+  - script: >-
+      python -m pytest -n auto --browser $(browser)
+      --junitxml=reports/junit.xml
+      --html=reports/report.html
+      --self-contained-html
+    displayName: Run $(browser) UI suite
+    env:
+      SAUCE_USERNAME: $(SAUCE_USERNAME)
+      SAUCE_PASSWORD: $(SAUCE_PASSWORD)
+      SAUCE_LOCKED_OUT_USERNAME: $(SAUCE_LOCKED_OUT_USERNAME)
+
+  - task: PublishTestResults@2
+    displayName: Publish JUnit test results
+    condition: always()
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: reports/junit.xml
+      failTaskOnFailedTests: true
+      testRunTitle: Sauce Demo UI - $(browser)
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish HTML report
+    condition: always()
+    inputs:
+      targetPath: reports
+      artifact: html-report-$(browser)
+      publishLocation: pipeline
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish failure traces, screenshots, and videos
+    condition: always()
+    inputs:
+      targetPath: test-results
+      artifact: failure-artifacts-$(browser)
+      publishLocation: pipeline
