@@ -45,7 +45,6 @@ def auth_state(
     browser: Browser, playwright: Playwright, request: pytest.FixtureRequest, worker_id: str
 ) -> str:
     """Log in once and persist browser storage for all non-login test contexts."""
-    playwright.selectors.set_test_id_attribute("data-test")
     base_url = request.config.getoption("--base-url") or request.config.getini("base_url")
     username = request.config.getoption("--username")
     password = request.config.getoption("--password")
@@ -66,15 +65,16 @@ def auth_state(
 
 @pytest.fixture
 def browser_context_args(
-    browser_context_args: dict, request: pytest.FixtureRequest, auth_state: str
+    browser_context_args: dict, playwright: Playwright, request: pytest.FixtureRequest
 ) -> dict:
     """Use the one-time authenticated state unless a test exercises login."""
+    playwright.selectors.set_test_id_attribute("data-test")
     context_args = dict(browser_context_args)
     context_args["base_url"] = (
         request.config.getoption("--base-url") or request.config.getini("base_url")
     )
     if request.node.get_closest_marker("no_auth") is None:
-        context_args["storage_state"] = auth_state
+        context_args["storage_state"] = request.getfixturevalue("auth_state")
     return context_args
 
 

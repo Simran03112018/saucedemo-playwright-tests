@@ -37,7 +37,7 @@ One command runs the complete suite in parallel and creates JUnit XML and a self
 .\run_tests.ps1
 ```
 
-On Linux/macOS, use `bash run_tests.sh`. Set `PW_BROWSER=firefox` (or `webkit`) to choose another browser; install that browser first with `python -m playwright install firefox` or `python -m playwright install webkit`. Pass extra pytest options through the runner, for example `-k checkout`.
+On Linux/macOS, run `python -m pytest -n auto --browser chromium --junitxml=reports/junit.xml --html=reports/report.html --self-contained-html`. Set `--browser firefox` or `--browser webkit` to choose another browser; install it first with `python -m playwright install firefox` or `python -m playwright install webkit`. Add pytest options such as `-k checkout` to run a subset.
 
 Useful focused commands:
 
